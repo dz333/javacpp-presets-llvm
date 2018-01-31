@@ -43,8 +43,14 @@ cd tools
 tar --totals -xf ../../../cfe-$LLVM_VERSION.src.tar.xz
 rm -Rf clang
 mv cfe-$LLVM_VERSION.src clang
-cd ../build
+cd ..
 
+# Inject Go debug info bindings (hack).
+cp bindings/go/llvm/{IRBindings,DIBuilderBindings}.h include/llvm-c/
+cp bindings/go/llvm/{IRBindings,DIBuilderBindings}.{h,cpp} lib/IR/
+perl -i.bak -plne 'print "  DIBuilderBindings.cpp\n  IRBindings.cpp" if(/Core.cpp/);' lib/IR/CMakeLists.txt
+
+cd build
 $CMAKE -DCMAKE_INSTALL_PREFIX=../.. -DDLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_LINK_LLVM_DYLIB=ON -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=host -DLIBXML2_LIBRARIES= ..
 make -j $MAKEJ
 make install > /dev/null
