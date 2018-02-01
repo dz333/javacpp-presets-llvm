@@ -46,8 +46,9 @@ mv cfe-$LLVM_VERSION.src clang
 cd ..
 
 # Inject Go debug info bindings (hack).
-cp bindings/go/llvm/{IRBindings,DIBuilderBindings}.h include/llvm-c/
-cp bindings/go/llvm/{IRBindings,DIBuilderBindings}.{h,cpp} lib/IR/
+pwd
+cp ../../../bindings/{IRBindings,DIBuilderBindings}.h include/llvm-c/
+cp ../../../bindings/{IRBindings,DIBuilderBindings}.{h,cpp} lib/IR/
 perl -i.bak -plne 'print "  DIBuilderBindings.cpp\n  IRBindings.cpp" if(/Core.cpp/);' lib/IR/CMakeLists.txt
 
 cd build
