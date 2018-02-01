@@ -1,3 +1,11 @@
+This Fork
+=========
+
+This is a fork of JavaCPP Presets which adds custom bindings to the LLVM C API
+bridge. These bindings support debug information in PolyLLVM; the LLVM C
+API lacks debug information support that exists in the C++ API.
+
+
 JavaCPP Presets
 ===============
 
@@ -190,6 +198,6 @@ To contribute, please fork and create pull requests, or post your suggestions [a
 
 
 ----
-Project lead: Samuel Audet [samuel.audet `at` gmail.com](mailto:samuel.audet at gmail.com)  
-Developer site: https://github.com/bytedeco/javacpp-presets  
+Project lead: Samuel Audet [samuel.audet `at` gmail.com](mailto:samuel.audet at gmail.com)
+Developer site: https://github.com/bytedeco/javacpp-presets
 Discussion group: http://groups.google.com/group/javacpp-project
