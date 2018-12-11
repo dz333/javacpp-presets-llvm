@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.bytedeco</groupId>
   <artifactId>javacpp-presets</artifactId>
-  <version>1.4.1-SNAPSHOT</version>
+  <version>1.4.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>JavaCPP Presets</name>
@@ -129,7 +129,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.7</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>javacpp.parser</id>
@@ -142,7 +142,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
+        <version>3.7.0</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
@@ -197,7 +197,6 @@
           </includePaths>
           <linkPaths>
             <linkPath>${basedir}/cppbuild/${javacpp.platform}${javacpp.platform.extension}/lib/</linkPath>
-            <linkPath>${basedir}/cppbuild/${javacpp.platform}${javacpp.platform.extension}/lib64/</linkPath>
           </linkPaths>
           <preloadPath>${basedir}/cppbuild/${javacpp.platform}${javacpp.platform.extension}/bin/</preloadPath>
           <resourcePaths>
@@ -216,13 +215,12 @@
             <includeResource>/org/bytedeco/javacpp/${javacpp.platform}/include/</includeResource>
           </includeResources>
           <linkResources>
+            <linkResource>/${javacpp.platform.library.path}/</linkResource>
             <linkResource>/${javacpp.platform.library.path}/lib/</linkResource>
             <linkResource>/org/bytedeco/javacpp/${javacpp.platform}${javacpp.platform.extension}/</linkResource>
             <linkResource>/org/bytedeco/javacpp/${javacpp.platform}${javacpp.platform.extension}/lib/</linkResource>
-            <linkResource>/org/bytedeco/javacpp/${javacpp.platform}${javacpp.platform.extension}/lib64/</linkResource>
             <linkResource>/org/bytedeco/javacpp/${javacpp.platform}/</linkResource>
             <linkResource>/org/bytedeco/javacpp/${javacpp.platform}/lib/</linkResource>
-            <linkResource>/org/bytedeco/javacpp/${javacpp.platform}/lib64/</linkResource>
           </linkResources>
         </configuration>
         <executions>
@@ -286,14 +284,14 @@
               <skip>${javacpp.compiler.skip}</skip>
               <classOrPackageName>org.bytedeco.javacpp.*</classOrPackageName>
               <copyLibs>true</copyLibs>
-<!--              <copyResources>true</copyResources>-->
+              <copyResources>true</copyResources>
             </configuration>
           </execution>
         </executions>
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.2</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>default-jar</id>
@@ -308,7 +306,7 @@
 <!--                </manifest>                         -->
                 <manifestEntries>
                   <!-- <addClasspath/> is broken: http://jira.codehaus.org/browse/MJAR-61 -->
-                  <Class-Path>. javacpp.jar</Class-Path>
+                  <Class-Path>javacpp.jar</Class-Path>
                   <Name>org/bytedeco/javacpp/presets/</Name>
                   <Implementation-Title>${project.name}</Implementation-Title>
                   <Implementation-Vendor>Bytedeco</Implementation-Vendor>
@@ -343,6 +341,7 @@
               <skipIfEmpty>true</skipIfEmpty>
               <includes>
                 <include>${javacpp.platform.library.path}/</include>
+                <include>${javacpp.platform}${javacpp.platform.extension}/</include>
                 <include>org/bytedeco/javacpp/${javacpp.platform}${javacpp.platform.extension}/</include>
               </includes>
               <excludes>
@@ -366,6 +365,10 @@
         <version>3.0.1</version>
         <executions>
           <execution>
+            <id>attach-sources</id>
+            <phase>leave-disabled-to-not-generate-sources-twice-on-release</phase>
+          </execution>
+          <execution>
             <id>attach-source</id>
             <goals>
               <goal>jar-no-fork</goal>
@@ -375,7 +378,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.4</version>
+        <version>3.0.1</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -397,25 +400,9 @@
 
     <plugins>
       <plugin>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.6</version>
-        <executions>
-          <execution>
-            <id>default-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy</goal>
-            </goals>
-          </execution>
-        </executions>
+        <version>1.6.8</version>
         <extensions>true</extensions>
         <configuration>
           <serverId>sonatype-nexus-staging</serverId>
@@ -437,7 +424,7 @@
           <plugin>
             <artifactId>maven-javadoc-plugin</artifactId>
             <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
+              <doclint>none</doclint>
             </configuration>
           </plugin>
         </plugins>
@@ -459,6 +446,32 @@
           <value>true</value>
         </property>
       </activation>
+      <repositories>
+        <repository>
+          <id>sonatype-nexus-staging</id>
+          <name>Sonatype Nexus Staging</name>
+          <url>https://oss.sonatype.org/service/local/staging/deployByRepositoryId/${stagingRepositoryId}/</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>sonatype-nexus-staging</id>
+          <name>Sonatype Nexus Staging</name>
+          <url>https://oss.sonatype.org/service/local/staging/deployByRepositoryId/${stagingRepositoryId}/</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
       <build>
         <plugins>
           <plugin>
@@ -474,6 +487,7 @@
               </execution>
             </executions>
             <configuration>
+              <passphrase>${env.GPG_PASSPHRASE}</passphrase>
               <useAgent>false</useAgent>
             </configuration>
           </plugin>
@@ -492,6 +506,7 @@
         <module>opencv</module>
         <module>ffmpeg</module>
         <module>flycapture</module>
+        <module>spinnaker</module>
         <module>libdc1394</module>
         <module>libfreenect</module>
         <module>libfreenect2</module>
@@ -502,9 +517,13 @@
         <module>flandmark</module>
         <module>hdf5</module>
         <module>mkl</module>
+        <module>mkl-dnn</module>
         <module>openblas</module>
+        <module>arpack-ng</module>
+        <module>cminpack</module>
         <module>fftw</module>
         <module>gsl</module>
+        <module>cpython</module>
         <module>llvm</module>
         <module>libpostal</module>
         <module>leptonica</module>
@@ -513,7 +532,9 @@
         <module>cuda</module>
         <module>mxnet</module>
         <module>tensorflow</module>
+        <module>tensorrt</module>
         <module>ale</module>
+        <module>onnx</module>
         <module>liquidfun</module>
         <module>skia</module>
         <module>systems</module>
@@ -606,7 +627,7 @@
       </properties>
     </profile>
 
-    <!-- Provide convenient profiles to set commonly used paths for Android -->
+    <!-- Provide convenient profiles to list supported modules for each platform and set commonly used paths for Android -->
     <profile>
       <id>javacpp-platform-android-arm</id>
       <activation>
@@ -784,6 +805,138 @@
     </profile>
 
     <profile>
+      <id>javacpp-platform-ios-arm</id>
+      <activation>
+        <property>
+          <name>javacpp.platform</name>
+          <value>ios-arm</value>
+        </property>
+      </activation>
+      <modules>
+        <module>opencv</module>
+        <module>openblas</module>
+        <module>skia</module>
+      </modules>
+      <properties>
+        <javacpp.platform.android-arm></javacpp.platform.android-arm>
+        <javacpp.platform.android-arm64></javacpp.platform.android-arm64>
+        <javacpp.platform.android-x86></javacpp.platform.android-x86>
+        <javacpp.platform.android-x86_64></javacpp.platform.android-x86_64>
+        <javacpp.platform.ios-arm>${javacpp.platform}</javacpp.platform.ios-arm>
+        <javacpp.platform.ios-arm64></javacpp.platform.ios-arm64>
+        <javacpp.platform.ios-x86></javacpp.platform.ios-x86>
+        <javacpp.platform.ios-x86_64></javacpp.platform.ios-x86_64>
+        <javacpp.platform.linux-armhf></javacpp.platform.linux-armhf>
+        <javacpp.platform.linux-arm64></javacpp.platform.linux-arm64>
+        <javacpp.platform.linux-ppc64le></javacpp.platform.linux-ppc64le>
+        <javacpp.platform.linux-x86></javacpp.platform.linux-x86>
+        <javacpp.platform.linux-x86_64></javacpp.platform.linux-x86_64>
+        <javacpp.platform.macosx-x86_64></javacpp.platform.macosx-x86_64>
+        <javacpp.platform.windows-x86></javacpp.platform.windows-x86>
+        <javacpp.platform.windows-x86_64></javacpp.platform.windows-x86_64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp-platform-ios-arm64</id>
+      <activation>
+        <property>
+          <name>javacpp.platform</name>
+          <value>ios-arm64</value>
+        </property>
+      </activation>
+      <modules>
+        <module>opencv</module>
+        <module>openblas</module>
+        <module>skia</module>
+      </modules>
+      <properties>
+        <javacpp.platform.android-arm></javacpp.platform.android-arm>
+        <javacpp.platform.android-arm64></javacpp.platform.android-arm64>
+        <javacpp.platform.android-x86></javacpp.platform.android-x86>
+        <javacpp.platform.android-x86_64></javacpp.platform.android-x86_64>
+        <javacpp.platform.ios-arm></javacpp.platform.ios-arm>
+        <javacpp.platform.ios-arm64>${javacpp.platform}</javacpp.platform.ios-arm64>
+        <javacpp.platform.ios-x86></javacpp.platform.ios-x86>
+        <javacpp.platform.ios-x86_64></javacpp.platform.ios-x86_64>
+        <javacpp.platform.linux-armhf></javacpp.platform.linux-armhf>
+        <javacpp.platform.linux-arm64></javacpp.platform.linux-arm64>
+        <javacpp.platform.linux-ppc64le></javacpp.platform.linux-ppc64le>
+        <javacpp.platform.linux-x86></javacpp.platform.linux-x86>
+        <javacpp.platform.linux-x86_64></javacpp.platform.linux-x86_64>
+        <javacpp.platform.macosx-x86_64></javacpp.platform.macosx-x86_64>
+        <javacpp.platform.windows-x86></javacpp.platform.windows-x86>
+        <javacpp.platform.windows-x86_64></javacpp.platform.windows-x86_64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp-platform-ios-x86</id>
+      <activation>
+        <property>
+          <name>javacpp.platform</name>
+          <value>ios-x86</value>
+        </property>
+      </activation>
+      <modules>
+        <module>opencv</module>
+        <module>openblas</module>
+        <module>skia</module>
+      </modules>
+      <properties>
+        <javacpp.platform.android-arm></javacpp.platform.android-arm>
+        <javacpp.platform.android-arm64></javacpp.platform.android-arm64>
+        <javacpp.platform.android-x86></javacpp.platform.android-x86>
+        <javacpp.platform.android-x86_64></javacpp.platform.android-x86_64>
+        <javacpp.platform.ios-arm></javacpp.platform.ios-arm>
+        <javacpp.platform.ios-arm64></javacpp.platform.ios-arm64>
+        <javacpp.platform.ios-x86>${javacpp.platform}</javacpp.platform.ios-x86>
+        <javacpp.platform.ios-x86_64></javacpp.platform.ios-x86_64>
+        <javacpp.platform.linux-armhf></javacpp.platform.linux-armhf>
+        <javacpp.platform.linux-arm64></javacpp.platform.linux-arm64>
+        <javacpp.platform.linux-ppc64le></javacpp.platform.linux-ppc64le>
+        <javacpp.platform.linux-x86></javacpp.platform.linux-x86>
+        <javacpp.platform.linux-x86_64></javacpp.platform.linux-x86_64>
+        <javacpp.platform.macosx-x86_64></javacpp.platform.macosx-x86_64>
+        <javacpp.platform.windows-x86></javacpp.platform.windows-x86>
+        <javacpp.platform.windows-x86_64></javacpp.platform.windows-x86_64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp-platform-ios-x86_64</id>
+      <activation>
+        <property>
+          <name>javacpp.platform</name>
+          <value>ios-x86_64</value>
+        </property>
+      </activation>
+      <modules>
+        <module>opencv</module>
+        <module>openblas</module>
+        <module>skia</module>
+      </modules>
+      <properties>
+        <javacpp.platform.android-arm></javacpp.platform.android-arm>
+        <javacpp.platform.android-arm64></javacpp.platform.android-arm64>
+        <javacpp.platform.android-x86></javacpp.platform.android-x86>
+        <javacpp.platform.android-x86_64></javacpp.platform.android-x86_64>
+        <javacpp.platform.ios-arm></javacpp.platform.ios-arm>
+        <javacpp.platform.ios-arm64></javacpp.platform.ios-arm64>
+        <javacpp.platform.ios-x86></javacpp.platform.ios-x86>
+        <javacpp.platform.ios-x86_64>${javacpp.platform}</javacpp.platform.ios-x86_64>
+        <javacpp.platform.linux-armhf></javacpp.platform.linux-armhf>
+        <javacpp.platform.linux-arm64></javacpp.platform.linux-arm64>
+        <javacpp.platform.linux-ppc64le></javacpp.platform.linux-ppc64le>
+        <javacpp.platform.linux-x86></javacpp.platform.linux-x86>
+        <javacpp.platform.linux-x86_64></javacpp.platform.linux-x86_64>
+        <javacpp.platform.macosx-x86_64></javacpp.platform.macosx-x86_64>
+        <javacpp.platform.windows-x86></javacpp.platform.windows-x86>
+        <javacpp.platform.windows-x86_64></javacpp.platform.windows-x86_64>
+      </properties>
+    </profile>
+
+    <profile>
       <id>javacpp-platform-linux-armhf</id>
       <activation>
         <property>
@@ -801,6 +954,8 @@
         <module>chilitags</module>
         <module>flandmark</module>
         <module>openblas</module>
+        <module>arpack-ng</module>
+        <module>cminpack</module>
         <module>fftw</module>
         <module>gsl</module>
         <module>leptonica</module>
@@ -845,6 +1000,8 @@
         <module>chilitags</module>
         <module>flandmark</module>
         <module>openblas</module>
+        <module>arpack-ng</module>
+        <module>cminpack</module>
         <module>fftw</module>
         <module>gsl</module>
         <module>leptonica</module>
@@ -889,6 +1046,8 @@
         <module>flandmark</module>
         <module>hdf5</module>
         <module>openblas</module>
+        <module>arpack-ng</module>
+        <module>cminpack</module>
         <module>fftw</module>
         <module>gsl</module>
         <module>leptonica</module>
@@ -938,6 +1097,8 @@
         <module>hdf5</module>
         <module>mkl</module>
         <module>openblas</module>
+        <module>arpack-ng</module>
+        <module>cminpack</module>
         <module>fftw</module>
         <module>gsl</module>
         <module>llvm</module>
@@ -983,6 +1144,7 @@
         <module>opencv</module>
         <module>ffmpeg</module>
         <module>flycapture</module>
+        <module>spinnaker</module>
         <module>libdc1394</module>
         <module>libfreenect</module>
         <module>libfreenect2</module>
@@ -992,10 +1154,14 @@
         <module>flandmark</module>
         <module>hdf5</module>
         <module>mkl</module>
+        <module>mkl-dnn</module>
         <module>openblas</module>
+        <module>arpack-ng</module>
+        <module>cminpack</module>
         <module>fftw</module>
         <module>gsl</module>
         <module>llvm</module>
+        <module>cpython</module>
         <module>libpostal</module>
         <module>leptonica</module>
         <module>tesseract</module>
@@ -1003,7 +1169,9 @@
         <module>cuda</module>
         <module>mxnet</module>
         <module>tensorflow</module>
+        <module>tensorrt</module>
         <module>ale</module>
+        <module>onnx</module>
         <module>liquidfun</module>
         <module>skia</module>
         <module>systems</module>
@@ -1048,10 +1216,14 @@
         <module>flandmark</module>
         <module>hdf5</module>
         <module>mkl</module>
+        <module>mkl-dnn</module>
         <module>openblas</module>
+        <module>arpack-ng</module>
+        <module>cminpack</module>
         <module>fftw</module>
         <module>gsl</module>
         <module>llvm</module>
+        <module>cpython</module>
         <module>libpostal</module>
         <module>leptonica</module>
         <module>tesseract</module>
@@ -1060,6 +1232,7 @@
         <module>mxnet</module>
         <module>tensorflow</module>
         <module>ale</module>
+        <module>onnx</module>
         <module>liquidfun</module>
         <module>skia</module>
         <module>systems</module>
@@ -1096,6 +1269,7 @@
         <module>opencv</module>
         <module>ffmpeg</module>
         <module>flycapture</module>
+        <module>spinnaker</module>
         <module>libdc1394</module>
         <module>libfreenect</module>
         <module>librealsense</module>
@@ -1106,11 +1280,15 @@
         <module>hdf5</module>
         <module>mkl</module>
         <module>openblas</module>
+        <module>arpack-ng</module>
+        <module>cminpack</module>
         <module>fftw</module>
         <module>gsl</module>
+        <module>llvm</module>
         <module>leptonica</module>
         <module>tesseract</module>
         <module>ale</module>
+        <module>liquidfun</module>
         <module>systems</module>
       </modules>
       <properties>
@@ -1145,6 +1323,7 @@
         <module>opencv</module>
         <module>ffmpeg</module>
         <module>flycapture</module>
+        <module>spinnaker</module>
         <module>libdc1394</module>
         <module>libfreenect</module>
         <module>libfreenect2</module>
@@ -1155,14 +1334,22 @@
         <module>flandmark</module>
         <module>hdf5</module>
         <module>mkl</module>
+        <module>mkl-dnn</module>
         <module>openblas</module>
+        <module>arpack-ng</module>
+        <module>cminpack</module>
         <module>fftw</module>
         <module>gsl</module>
+        <module>cpython</module>
+        <module>llvm</module>
         <module>libpostal</module>
         <module>leptonica</module>
         <module>tesseract</module>
         <module>cuda</module>
+        <module>mxnet</module>
+        <module>tensorflow</module>
         <module>ale</module>
+        <module>liquidfun</module>
         <module>systems</module>
       </modules>
       <properties>
@@ -1185,7 +1372,201 @@
       </properties>
     </profile>
 
-    <!-- If someone knows a better way to do this, please do let me know! -->
+    <!-- Profiles to modify the transitive dependencies when picked up from other pom.xml files, for example:
+         mvn -Djavacpp.platform.none -Djavacpp.platform.linux-x86_64 -Djavacpp.platform.windows-x86_64 ... -->
+    <profile>
+      <id>javacpp.platform.android-arm-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.android-arm</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.android-arm>android-arm</javacpp.platform.android-arm>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.android-arm64-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.android-arm64</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.android-arm64>android-arm64</javacpp.platform.android-arm64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.android-x86-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.android-x86</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.android-x86>android-x86</javacpp.platform.android-x86>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.android-x86_64-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.android-x86_64</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.android-x86_64>android-x86_64</javacpp.platform.android-x86_64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.ios-arm-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.ios-arm</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.ios-arm>ios-arm</javacpp.platform.ios-arm>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.ios-arm64-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.ios-arm64</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.ios-arm64>ios-arm64</javacpp.platform.ios-arm64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.ios-x86-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.ios-x86</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.ios-x86>ios-x86</javacpp.platform.ios-x86>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.ios-x86_64-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.ios-x86_64</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.ios-x86_64>ios-x86_64</javacpp.platform.ios-x86_64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.linux-armhf-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.linux-armhf</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.linux-armhf>linux-armhf</javacpp.platform.linux-armhf>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.linux-arm64-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.linux-arm64</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.linux-arm64>linux-arm64</javacpp.platform.linux-arm64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.linux-ppc64le-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.linux-ppc64le</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.linux-ppc64le>linux-ppc64le</javacpp.platform.linux-ppc64le>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.linux-x86-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.linux-x86</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.linux-x86>linux-x86</javacpp.platform.linux-x86>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.linux-x86_64-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.linux-x86_64</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.linux-x86_64>linux-x86_64</javacpp.platform.linux-x86_64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.macosx-x86_64-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.macosx-x86_64</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.macosx-x86_64>macosx-x86_64</javacpp.platform.macosx-x86_64>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.windows-x86-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.windows-x86</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.windows-x86>windows-x86</javacpp.platform.windows-x86>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>javacpp.platform.windows-x86_64-true</id>
+      <activation>
+        <property>
+          <name>javacpp.platform.windows-x86_64</name>
+        </property>
+      </activation>
+      <properties>
+        <javacpp.platform.windows-x86_64>windows-x86_64</javacpp.platform.windows-x86_64>
+      </properties>
+    </profile>
+
+    <!-- Profiles to set the default javacpp.platform property: If someone knows a better way to do this, please do let me know! -->
     <profile>
       <id>linux</id>
       <activation>
