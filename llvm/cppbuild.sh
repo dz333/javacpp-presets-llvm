@@ -27,9 +27,9 @@ cd ..
 
 # Inject debug info bindings (hack).
 pwd
-cp ../../../bindings/{IRBindings,DIBuilderBindings}.h include/llvm-c/
-cp ../../../bindings/{IRBindings,DIBuilderBindings}.{h,cpp} lib/IR/
-perl -i.bak -plne 'print "  DIBuilderBindings.cpp\n  IRBindings.cpp" if(/Core.cpp/);' lib/IR/CMakeLists.txt
+cp ../../../bindings/IRBindings.h include/llvm-c/
+cp ../../../bindings/IRBindings.{h,cpp} lib/IR/
+perl -i.bak -plne 'print " IRBindings.cpp" if(/Core.cpp/);' lib/IR/CMakeLists.txt
 
 cd build
 

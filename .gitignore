@@ -14,3 +14,5 @@
 # IntelliJ
 *.iml
 .idea
+llvm/src/main/java/org/bytedeco/javacpp/clang.java
+llvm/src/main/java/org/bytedeco/javacpp/LLVM.java

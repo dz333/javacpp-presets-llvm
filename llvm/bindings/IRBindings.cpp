@@ -36,13 +36,6 @@ LLVMMetadataRef LLVMMDNode2(LLVMContextRef C, LLVMMetadataRef *MDs,
       MDNode::get(*unwrap(C), ArrayRef<Metadata *>(unwrap(MDs), Count)));
 }
 
-LLVMMetadataRef LLVMTemporaryMDNode(LLVMContextRef C, LLVMMetadataRef *MDs,
-                                    unsigned Count) {
-  return wrap(MDTuple::getTemporary(*unwrap(C),
-                                    ArrayRef<Metadata *>(unwrap(MDs), Count))
-                  .release());
-}
-
 void LLVMAddNamedMetadataOperand2(LLVMModuleRef M, const char *name,
                                   LLVMMetadataRef Val) {
   NamedMDNode *N = unwrap(M)->getOrInsertNamedMetadata(name);
@@ -58,12 +51,6 @@ void LLVMSetMetadata2(LLVMValueRef Inst, unsigned KindID, LLVMMetadataRef MD) {
   unwrap<Instruction>(Inst)->setMetadata(KindID, N);
 }
 
-void LLVMMetadataReplaceAllUsesWith(LLVMMetadataRef MD, LLVMMetadataRef New) {
-  auto *Node = unwrap<MDNode>(MD);
-  Node->replaceAllUsesWith(unwrap<Metadata>(New));
-  MDNode::deleteTemporary(Node);
-}
-
 void LLVMSetCurrentDebugLocation2(LLVMBuilderRef Bref, unsigned Line,
                                   unsigned Col, LLVMMetadataRef Scope,
                                   LLVMMetadataRef InlinedAt) {
@@ -71,6 +58,7 @@ void LLVMSetCurrentDebugLocation2(LLVMBuilderRef Bref, unsigned Line,
       DebugLoc::get(Line, Col, Scope ? unwrap<MDNode>(Scope) : nullptr,
                     InlinedAt ? unwrap<MDNode>(InlinedAt) : nullptr));
 }
+
 
 LLVMDebugLocMetadata LLVMGetCurrentDebugLocation2(LLVMBuilderRef Bref) {
   const auto& Loc = unwrap(Bref)->getCurrentDebugLocation();
@@ -82,8 +70,4 @@ LLVMDebugLocMetadata LLVMGetCurrentDebugLocation2(LLVMBuilderRef Bref) {
     InlinedAt == nullptr ? nullptr : wrap(InlinedAt->getRawInlinedAt()),
   };
   return md;
-}
-
-void LLVMSetSubprogram(LLVMValueRef Func, LLVMMetadataRef SP) {
-  unwrap<Function>(Func)->setSubprogram(unwrap<DISubprogram>(SP));
 }
